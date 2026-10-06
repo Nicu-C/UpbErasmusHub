@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\UpbErasmusHub.Theme.props" />
-</Project>
