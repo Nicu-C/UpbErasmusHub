@@ -1,0 +1,2 @@
+C:\Users\nicuc\UpbErasmusHub\src\Themes\UpbErasmusHub.Theme\obj\Debug\net10.0\staticwebassets.build.json
+C:\Users\nicuc\UpbErasmusHub\src\Modules\UpbErasmusHub.Core\obj\Debug\net10.0\staticwebassets.build.json

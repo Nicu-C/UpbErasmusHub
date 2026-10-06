@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\UpbErasmusHub.Core.props" />
+</Project>
