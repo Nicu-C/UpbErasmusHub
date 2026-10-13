@@ -16,6 +16,7 @@
     <PackageReference Include="OrchardCore.ContentManagement" Version="3.0.1" />
     <PackageReference Include="OrchardCore.DisplayManagement" Version="3.0.1" />
     <PackageReference Include="OrchardCore.ResourceManagement" Version="3.0.1" />
+	<PackageReference Include="TheBlogTheme" Version="3.0.1" />
   </ItemGroup>
 
 </Project>
