@@ -16,6 +16,10 @@
     <PackageReference Include="OrchardCore.ContentManagement" Version="3.0.1" />
     <PackageReference Include="OrchardCore.ContentTypes.Abstractions" Version="3.0.1" />
     <PackageReference Include="OrchardCore.DisplayManagement" Version="3.0.1" />
+	  <PackageReference Include="OrchardCore.Data.Abstractions" Version="3.0.1" />
+	  <PackageReference Include="OrchardCore.ContentFields" Version="3.0.1" />
+	  <PackageReference Include="OrchardCore.Title" Version="3.0.1" />
+	  <PackageReference Include="OrchardCore.Autoroute" Version="3.0.1" />
   </ItemGroup>
 
 </Project>
