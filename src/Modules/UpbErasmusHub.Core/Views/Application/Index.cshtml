@@ -1,0 +1,72 @@
+﻿@model IEnumerable<OrchardCore.ContentManagement.ContentItem>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="text-white py-5 mb-5" style="background: linear-gradient(135deg, #07192f 0%, #0b2545 100%);">
+    <div class="container text-center">
+        <a href="/" class="btn btn-sm btn-outline-light rounded-pill mb-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Home
+        </a>
+        <h1 class="display-4 fw-bold">Erasmus+ Application Steps</h1>
+        <p class="lead text-light opacity-75 max-w-700 mx-auto">
+            Follow this step-by-step roadmap to successfully prepare your documents, ace your interview, and secure your Learning Agreement.
+        </p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info p-4 text-center">
+            <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+            No application steps have been published yet. Go to your Admin panel, create new <strong>Application Step</strong> items, and publish them!
+        </div>
+    }
+    else
+    {
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+
+                @foreach (var item in Model)
+                {
+                    var part = item.Content.ApplicationStepPart;
+                    var stepNum = part?.StepNumber?.Value != null ? (int)part.StepNumber.Value : 1;
+
+                    // MODIFY THESE LINES: Explicitly convert dynamic text fields to C# strings
+                    string documents = part?.RequiredDocuments?.Text?.ToString() ?? "";
+                    string guide = part?.StageGuide?.Text?.ToString() ?? "";
+
+                    <div class="card shadow-sm border-0 mb-4 rounded-4 p-4 p-md-5">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center fs-4 me-3" style="width: 50px; height: 50px;">
+                                @stepNum
+                            </div>
+                            <h2 class="h3 fw-bold text-dark mb-0">@item.DisplayText</h2>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(documents))
+                        {
+                            <div class="mb-3 p-3 bg-light rounded-3">
+                                <h6 class="text-uppercase fw-bold text-primary small mb-2"><i class="bi bi-file-earmark-text me-1"></i> Required Documents & Criteria</h6>
+                                <p class="mb-0 text-dark" style="white-space: pre-line;">@documents</p>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(guide))
+                        {
+                            <div class="text-muted" style="white-space: pre-line;">
+                                <h6 class="text-uppercase fw-bold text-secondary small mb-2"><i class="bi bi-lightbulb me-1"></i> Guide & Advice</h6>
+                                @guide
+                            </div>
+                        }
+                    </div>
+                }
+
+
+
+            </div>
+        </div>
+    }
+</div>

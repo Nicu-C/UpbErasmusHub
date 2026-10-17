@@ -135,5 +135,47 @@ namespace UpbErasmusHub.Core
 
             return 1;
         }
+
+
+        public async Task<int> UpdateFrom1Async()
+        {
+            // Define the ApplicationStep Part and its Fields
+            await _contentDefinitionManager.AlterPartDefinitionAsync("ApplicationStepPart", part => part
+                .WithField("StepNumber", field => field
+                    .OfType(nameof(NumericField))
+                    .WithDisplayName("Stage Number (e.g., 1, 2, 3)")
+                    .WithPosition("0")
+                    .WithSettings(new NumericFieldSettings { Required = true, Minimum = 1, Maximum = 10, DefaultValue = "1" })
+                )
+                .WithField("RequiredDocuments", field => field
+                    .OfType(nameof(TextField))
+                    .WithDisplayName("Required Documents & Checklist")
+                    .WithEditor("TextArea")
+                    .WithPosition("1")
+                    .WithSettings(new TextFieldSettings { Hint = "Transcript of Records, Language Certificate, CV, Motivation Letter..." })
+                )
+                .WithField("StageGuide", field => field
+                    .OfType(nameof(TextField))
+                    .WithDisplayName("Step-by-Step Guide & Tips")
+                    .WithEditor("TextArea")
+                    .WithPosition("2")
+                )
+            );
+
+            // Define the ApplicationStep Content Type
+            await _contentDefinitionManager.AlterTypeDefinitionAsync("ApplicationStep", type => type
+                .DisplayedAs("Application Step")
+                .Creatable()
+                .Listable()
+                .Draftable()
+                .Securable()
+                .WithPart("TitlePart", part => part.WithPosition("0"))
+                .WithPart("ApplicationStepPart", part => part.WithPosition("1"))
+            );
+
+            return 2; // Bumps migration version to 2
+        }
+
+
     }
 }
