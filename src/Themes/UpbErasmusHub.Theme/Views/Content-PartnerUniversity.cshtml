@@ -1,0 +1,68 @@
+﻿@using OrchardCore.ContentManagement
+@{
+    ContentItem item = Model.ContentItem;
+    var part = item.Content.PartnerUniversityPart;
+    string erasmusCode = part?.ErasmusCode ?? "ERASMUS+";
+    string country = part?.Country ?? "Europe";
+    string city = part?.City ?? "";
+    string languageLevel = part?.RequiredLanguageLevel ?? "B2";
+    string websiteUrl = part?.WebsiteUrl ?? "";
+    int spots = part?.AvailableSpots ?? 2;
+    string faculty = part?.FacultyDepartment?.Text ?? "All Engineering Faculties";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="container py-5">
+    <div class="mb-3">
+        <a href="/universities" class="text-decoration-none small text-muted">
+            <i class="bi bi-arrow-left me-1"></i> Back to Partner Universities Directory
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 p-4 p-md-5 bg-white rounded-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-4 mb-4">
+            <div>
+                <span class="badge bg-primary fs-5 px-3 py-2 me-2">@erasmusCode</span>
+                <span class="text-muted fw-semibold fs-5">
+                    <i class="bi bi-geo-alt-fill text-danger"></i> @(string.IsNullOrEmpty(city) ? country : $"{city}, {country}")
+                </span>
+            </div>
+            <div class="mt-3 mt-md-0">
+                <span class="badge bg-warning text-dark px-3 py-2 fs-6">Min. Language: @languageLevel</span>
+                <span class="badge bg-success px-3 py-2 fs-6 ms-1">@spots Spots Available</span>
+            </div>
+        </div>
+
+        <h1 class="display-5 fw-bold text-dark mb-4">@item.DisplayText</h1>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted small text-uppercase fw-semibold mb-1">Target UPB Faculty / Department</div>
+                    <div class="fs-5 fw-bold text-dark">
+                        <i class="bi bi-cpu text-primary me-2"></i>@faculty
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="text-muted small text-uppercase fw-semibold mb-1">Erasmus Institutional Code</div>
+                    <div class="fs-5 fw-bold text-dark">
+                        <i class="bi bi-patch-check-fill text-info me-2"></i>@erasmusCode
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(websiteUrl))
+        {
+            <div>
+                <a href="@websiteUrl" target="_blank" rel="noopener" class="btn btn-outline-primary btn-lg rounded-pill px-4">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Visit Official University Website
+                </a>
+            </div>
+        }
+    </div>
+</div>
