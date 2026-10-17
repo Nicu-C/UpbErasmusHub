@@ -1,0 +1,67 @@
+﻿@model UpbErasmusHub.Core.ViewModels.SubmitReviewViewModel
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <a href="/universities" class="btn btn-sm btn-outline-secondary rounded-pill mb-3">
+                <i class="bi bi-arrow-left"></i> Back to Universities
+            </a>
+            <div class="card shadow-sm border-0 p-4 p-md-5">
+                <h2 class="h3 fw-bold mb-2">Share Your Erasmus+ Experience</h2>
+                <p class="text-muted small mb-4">
+                    Your review will be linked to your host university and moderated before going live.
+                </p>
+
+                <form asp-action="Submit" asp-controller="Review" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="UniversityContentItemId" class="form-label fw-semibold">Host Partner University *</label>
+                        <select asp-for="UniversityContentItemId" asp-items="Model.Universities" class="form-select" required>
+                            <option value="">-- Select University --</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="StudentName" class="form-label fw-semibold">Your Name / Initials *</label>
+                            <input asp-for="StudentName" class="form-control" placeholder="e.g., Andrei P." required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MobilitySemester" class="form-label fw-semibold">Mobility Semester *</label>
+                            <input asp-for="MobilitySemester" class="form-control" placeholder="e.g., Winter 2025/2026" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="OverallRating" class="form-label fw-semibold">Overall Rating (1 - 5) *</label>
+                            <input asp-for="OverallRating" type="number" min="1" max="5" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MonthlyLivingCost" class="form-label fw-semibold">Monthly Living Cost (EUR) *</label>
+                            <input asp-for="MonthlyLivingCost" type="number" min="100" max="5000" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="HousingAdvice" class="form-label fw-semibold">Housing & Accommodation Tips *</label>
+                        <textarea asp-for="HousingAdvice" rows="2" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ReviewComments" class="form-label fw-semibold">Academic & Campus Experience *</label>
+                        <textarea asp-for="ReviewComments" rows="4" class="form-control" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-semibold">
+                        <i class="bi bi-send-fill me-1"></i> Submit Review for Approval
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
