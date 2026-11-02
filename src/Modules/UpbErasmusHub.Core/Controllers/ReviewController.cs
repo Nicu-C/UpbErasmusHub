@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using OrchardCore.ContentFields.Fields;
 using OrchardCore.ContentManagement;
 using OrchardCore.ContentManagement.Records;
 using OrchardCore.Title.Models;
@@ -63,20 +64,56 @@ public sealed class ReviewController : Controller
             return View(model);
         }
 
+        // 1. Initialize a new StudentReview content item
         var contentItem = await _contentManager.NewAsync("StudentReview");
+
+        // 2. Set the TitlePart and DisplayText
+        var title = $"Review by {model.StudentName} ({model.MobilitySemester})";
+        contentItem.DisplayText = title;
 
         var titlePart = contentItem.As<TitlePart>();
         if (titlePart != null)
         {
-            titlePart.Title = $"Review by {model.StudentName} ({model.MobilitySemester})";
-            contentItem.DisplayText = titlePart.Title;
+            titlePart.Title = title;
             contentItem.Apply(titlePart);
         }
 
-        // Safely set content fields on StudentReviewPart
-        contentItem.Weld(new OrchardCore.ContentManagement.ContentPart());
+        // 3. Combine housing advice and comments into ReviewComments text
+        var combinedComments = string.IsNullOrWhiteSpace(model.HousingAdvice)
+            ? model.ReviewComments
+            : $"Housing Advice:\n{model.HousingAdvice}\n\nReview & Experience:\n{model.ReviewComments}";
 
-        // Save as DRAFT for admin moderation workflow
+        // 4. Retrieve or create StudentReviewPart (exact name from Migrations.cs)
+        var reviewPart = contentItem.Get<ContentPart>("StudentReviewPart") ?? new ContentPart();
+
+        // HostUniversity (ContentPickerField)
+        var pickerField = new ContentPickerField
+        {
+            ContentItemIds = string.IsNullOrWhiteSpace(model.UniversityContentItemId)
+                ? Array.Empty<string>()
+                : new[] { model.UniversityContentItemId }
+        };
+        reviewPart.Apply("HostUniversity", pickerField);
+
+        // StudentName (TextField)
+        reviewPart.Apply("StudentName", new TextField { Text = model.StudentName });
+
+        // MobilitySemester (TextField)
+        reviewPart.Apply("MobilitySemester", new TextField { Text = model.MobilitySemester });
+
+        // OverallRating (NumericField)
+        reviewPart.Apply("OverallRating", new NumericField { Value = (decimal)model.OverallRating });
+
+        // ReviewComments (TextField with TextArea editor)
+        reviewPart.Apply("ReviewComments", new TextField { Text = combinedComments });
+
+        // 5. Apply the part back onto the content item
+        contentItem.Apply("StudentReviewPart", reviewPart);
+
+        // MonthlyLivingCost (NumericField)
+        reviewPart.Apply("MonthlyLivingCost", new NumericField { Value = (decimal)model.MonthlyLivingCost });
+
+        // 6. Save as DRAFT for admin moderation workflow
         await _contentManager.CreateAsync(contentItem, VersionOptions.Draft);
 
         TempData["SuccessMessage"] = "Thank you! Your review has been submitted for moderation and will go live once approved.";

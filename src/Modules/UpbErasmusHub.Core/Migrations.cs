@@ -177,5 +177,28 @@ namespace UpbErasmusHub.Core
         }
 
 
+
+        public async Task<int> UpdateFrom2Async()
+        {
+            await _contentDefinitionManager.AlterPartDefinitionAsync("StudentReviewPart", part => part
+                .WithField("MonthlyLivingCost", field => field
+                    .OfType(nameof(NumericField))
+                    .WithDisplayName("Monthly Living Cost (EUR)")
+                    .WithPosition("4")
+                    .WithSettings(new NumericFieldSettings
+                    {
+                        Required = false,
+                        Minimum = 0,
+                        Scale = 0,
+                        DefaultValue = "650",
+                        Hint = "Estimated monthly expenses in EUR (housing, food, transport)."
+                    })
+                )
+            );
+
+            return 3; // Bumps migration version to 3
+        }
+
+
     }
 }
