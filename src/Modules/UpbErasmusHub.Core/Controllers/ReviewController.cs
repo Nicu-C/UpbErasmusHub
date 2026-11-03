@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -33,6 +35,20 @@ public sealed class ReviewController : Controller
         var orderedReviews = reviews
             .OrderByDescending(r => r.CreatedUtc)
             .ToList();
+
+        // 1. Gather all university IDs referenced by the reviews
+        var universityIds = orderedReviews
+            .Select(r => (string?)r.Content.StudentReviewPart?.HostUniversity?.ContentItemIds?[0])
+            .Where(id => !string.IsNullOrEmpty(id))
+            .Distinct()
+            .ToList();
+
+        // 2. Fetch the corresponding universities in one query
+        var universities = await _contentManager.GetAsync(universityIds);
+        var universityDict = universities.ToDictionary(u => u.ContentItemId, u => u.DisplayText);
+
+        // 3. Pass to the view via ViewBag
+        ViewBag.UniversityNames = universityDict;
 
         var model = new ReviewCatalogViewModel
         {
@@ -107,11 +123,11 @@ public sealed class ReviewController : Controller
         // ReviewComments (TextField with TextArea editor)
         reviewPart.Apply("ReviewComments", new TextField { Text = combinedComments });
 
+        // MonthlyLivingCost (NumericField) -> Applied BEFORE contentItem.Apply
+        reviewPart.Apply("MonthlyLivingCost", new NumericField { Value = (decimal)model.MonthlyLivingCost });
+
         // 5. Apply the part back onto the content item
         contentItem.Apply("StudentReviewPart", reviewPart);
-
-        // MonthlyLivingCost (NumericField)
-        reviewPart.Apply("MonthlyLivingCost", new NumericField { Value = (decimal)model.MonthlyLivingCost });
 
         // 6. Save as DRAFT for admin moderation workflow
         await _contentManager.CreateAsync(contentItem, VersionOptions.Draft);
