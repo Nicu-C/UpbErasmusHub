@@ -90,4 +90,11 @@ public sealed class UniversityController : Controller
         // 5. Renders Views/University/Index.cshtml[cite: 10]
         return View(model);
     }
+
+    [HttpGet("/about")]
+    public IActionResult About()
+    {
+        return View();
+    }
+
 }
