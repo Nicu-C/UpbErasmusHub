@@ -86,5 +86,27 @@
                 </div>
             }
         </div>
+
+
+        <!-- Pagination Bar -->
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mt-5 d-flex justify-content-center" aria-label="University pages">
+                <ul class="pagination shadow-sm">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link"
+                               href="/universities?search=@Model.SearchQuery&country=@Model.SelectedCountry&language=@Model.SelectedLanguageLevel&page=@i">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+</div>
+
     }
 </div>
