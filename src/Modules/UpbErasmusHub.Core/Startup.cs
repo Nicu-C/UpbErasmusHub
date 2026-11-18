@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using OrchardCore.ContentManagement;
 using OrchardCore.ContentManagement.Display.ContentDisplay; // <-- Added for UseDisplayDriver
+using OrchardCore.ContentManagement.Handlers;
 using OrchardCore.Data.Migration;
 using OrchardCore.Modules;
 using UpbErasmusHub.Core.Drivers; // <-- Added to find PartnerUniversityPartDisplayDriver
 using UpbErasmusHub.Core.Models;
+using UpbErasmusHub.Core.Handlers;
 
 namespace UpbErasmusHub.Core;
 
@@ -18,8 +20,7 @@ public sealed class Startup : StartupBase
         // Register the custom Content Part and attach its Display Driver
         services.AddContentPart<PartnerUniversityPart>()
             .UseDisplayDriver<PartnerUniversityPartDisplayDriver>();
-
-        // Register the Data Migration so Orchard runs CreateAsync on startup
+        services.AddScoped<IContentHandler, PartnerUniversityPartHandler>();        // Register the Data Migration so Orchard runs CreateAsync on startup
         services.AddDataMigration<Migrations>();
     }
 
