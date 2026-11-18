@@ -6,6 +6,8 @@ using OrchardCore.ContentManagement.Metadata;
 using OrchardCore.ContentManagement.Metadata.Settings;
 using OrchardCore.Data.Migration;
 using UpbErasmusHub.Core.Models;
+using UpbErasmusHub.Core.Indexes;
+using YesSql.Sql;
 
 namespace UpbErasmusHub.Core
 {
@@ -197,6 +199,31 @@ namespace UpbErasmusHub.Core
             );
 
             return 3; // Bumps migration version to 3
+        }
+
+
+        public async Task<int> UpdateFrom3Async()
+        {
+            await SchemaBuilder.CreateMapIndexTableAsync<PartnerUniversityIndex>(table => table
+                .Column<string>("ContentItemId", c => c.WithLength(26))
+                .Column<string>("UniversityName", c => c.WithLength(250))
+                .Column<string>("Country", c => c.WithLength(100))
+                .Column<string>("City", c => c.WithLength(100))
+                .Column<string>("ErasmusCode", c => c.WithLength(50))
+                .Column<string>("RequiredLanguageLevel", c => c.WithLength(10))
+                .Column<int>("AvailableSpots")
+                .Column<bool>("Published")
+            );
+
+            await SchemaBuilder.AlterIndexTableAsync<PartnerUniversityIndex>(table => table
+                .CreateIndex("IDX_PartnerUniversityIndex_DocumentId",
+                    "DocumentId",
+                    "Country",
+                    "RequiredLanguageLevel",
+                    "Published")
+            );
+
+            return 4;
         }
 
 
