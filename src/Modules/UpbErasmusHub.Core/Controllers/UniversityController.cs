@@ -1,9 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using OrchardCore.ContentManagement;
-using OrchardCore.ContentManagement.Records;
-using UpbErasmusHub.Core.Models;
+using UpbErasmusHub.Core.Indexes;
 using UpbErasmusHub.Core.ViewModels;
 using YesSql;
 
@@ -23,57 +23,55 @@ public sealed class UniversityController : Controller
     {
         const int pageSize = 6;
 
-        // 1. Query published partner universities from YesSql[cite: 10]
-        var query = _session.Query<ContentItem, ContentItemIndex>()
-            .Where(x => x.ContentType == "PartnerUniversity" && x.Published);
+        // 1. Fetch distinct countries directly from the PartnerUniversityIndex SQL table
+        var allIndexRows = await _session
+            .QueryIndex<PartnerUniversityIndex>(x => x.Published)
+            .ListAsync();
 
-        var allItems = await query.ListAsync();
-
-        // 2. Extract available countries for the filter dropdown
-        var availableCountries = allItems
-            .Select(i => i.As<PartnerUniversityPart>()?.Country)
+        var availableCountries = allIndexRows
+            .Select(x => x.Country)
             .Where(c => !string.IsNullOrWhiteSpace(c))
-            .Distinct()
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(c => c)
-            .Cast<string>()
             .ToList();
 
-        // 3. Apply C# Filters (Search keyword, Country, Language Level)[cite: 10]
-        var filteredItems = allItems.AsEnumerable();
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var queryText = search.Trim().ToLowerInvariant();
-            filteredItems = filteredItems.Where(i =>
-                i.DisplayText.ToLowerInvariant().Contains(queryText) ||
-                (i.As<PartnerUniversityPart>()?.City?.ToLowerInvariant().Contains(queryText) ?? false) ||
-                (i.As<PartnerUniversityPart>()?.ErasmusCode?.ToLowerInvariant().Contains(queryText) ?? false)
-            );
-        }
+        // 2. Build a SQL-backed YesSql query against PartnerUniversityIndex
+        var query = _session.Query<ContentItem, PartnerUniversityIndex>(x => x.Published);
 
         if (!string.IsNullOrWhiteSpace(country))
         {
-            filteredItems = filteredItems.Where(i =>
-                string.Equals(i.As<PartnerUniversityPart>()?.Country, country, System.StringComparison.OrdinalIgnoreCase)
-            );
+            var trimmedCountry = country.Trim();
+            query = query.Where(x => x.Country == trimmedCountry);
         }
 
         if (!string.IsNullOrWhiteSpace(language))
         {
-            filteredItems = filteredItems.Where(i =>
-                string.Equals(i.As<PartnerUniversityPart>()?.RequiredLanguageLevel, language, System.StringComparison.OrdinalIgnoreCase)
-            );
+            var trimmedLang = language.Trim().ToUpperInvariant();
+            query = query.Where(x => x.RequiredLanguageLevel == trimmedLang);
         }
 
-        var list = filteredItems.OrderBy(i => i.DisplayText).ToList();
-        int totalCount = list.Count;
-        int totalPages = System.Math.Max(1, (int)System.Math.Ceiling(totalCount / (double)pageSize));
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(x =>
+                x.UniversityName.Contains(term) ||
+                x.City.Contains(term) ||
+                x.ErasmusCode.Contains(term));
+        }
+
+        // 3. Count and paginate at the database level
+        int totalCount = await query.CountAsync();
+        int totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
 
         if (page > totalPages) page = totalPages;
         if (page < 1) page = 1;
 
-        // 4. Paginate with Skip / Take[cite: 10]
-        var pagedItems = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        var pagedItems = (await query
+            .OrderBy(x => x.UniversityName)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ListAsync())
+            .ToList();
 
         var model = new UniversityCatalogViewModel
         {
@@ -87,7 +85,6 @@ public sealed class UniversityController : Controller
             TotalCount = totalCount
         };
 
-        // 5. Renders Views/University/Index.cshtml[cite: 10]
         return View(model);
     }
 
@@ -96,5 +93,4 @@ public sealed class UniversityController : Controller
     {
         return View();
     }
-
 }
